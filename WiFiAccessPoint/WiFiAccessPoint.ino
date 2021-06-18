@@ -40,9 +40,9 @@ int channel2 = 1;    //
 int resolution = 8;   // 分辨率
 const int motor1 = 19;
 const int motor2 = 32;
-const int pwmLow = 180;
-const int pwmMiddle = 210;
-const int pwmHigh = 250;
+int pwmLow = 0;//180;
+int pwmMiddle= 0;//= 210;
+int pwmHigh = 0;//250;
 #define MOTOR1(x) ledcWrite(channel1, x);
 #define MOTOR2(x) ledcWrite(channel2, x);
 //继电器初始化
@@ -254,6 +254,11 @@ void setup() {
           {
             MOTOR1(pwmHigh);
           }
+                  //              else if(tmpStr[3]==3)//电机1
+        //              {
+        //                MOTOR1(pwmHigh);
+        //              }
+
         }
         if (tmpStr[3] == 0) //继电器1关
         {
@@ -283,12 +288,9 @@ void setup() {
           //                MOTOR2(pwmHigh);
           //              }
         }
-
-        //              else if(tmpStr[3]==3)//电机1
-        //              {
-        //                MOTOR1(pwmHigh);
-        //              }
-
+        pwmLow=tmpStr[5]+128;
+        pwmMiddle=tmpStr[6]+128;
+        pwmHigh=tmpStr[7]+128;
 
       }
     });
