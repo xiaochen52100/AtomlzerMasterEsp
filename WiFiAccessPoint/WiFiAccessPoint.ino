@@ -37,12 +37,18 @@ int dhtPin = 23;
 int freq = 8000;    // 频率
 int channel1 = 0;    // 通道1
 int channel2 = 1;    //
+int channel3 = 2;    // 通道1
+int channel4 = 3;    //
 int resolution = 8;   // 分辨率
 const int motor1 = 19;
 const int motor2 = 32;
+const int motor3 = 18;
+const int motor4 = 33;
 int pwmLow = 0;//180;
 int pwmMiddle= 0;//= 210;
 int pwmHigh = 0;//250;
+int direction1=1;
+int direction2=1;
 #define MOTOR1(x) ledcWrite(channel1, x);
 #define MOTOR2(x) ledcWrite(channel2, x);
 //继电器初始化
@@ -54,6 +60,37 @@ const int DO2LED = 27;
 #define DOUT2(x) digitalWrite(DO2,x)
 #define DOUT1LED(x) digitalWrite(DO1LED,x)
 #define DOUT2LED(x) digitalWrite(DO2LED,x)
+void setPWM(int switch,int direction,int speed)
+{
+    if(switch==1)
+    {
+      if(direction==1)
+      {
+        ledcWrite(channel1, speed);
+        ledcWrite(channel3, 0);
+      }
+      if(direction==2)
+      {
+        ledcWrite(channel3, speed);
+        ledcWrite(channel1, 0);
+      }
+      
+    }
+    if(switch==2)
+    {
+      if(direction==1)
+      {
+        ledcWrite(channel2, speed);
+        ledcWrite(channel4, 0);
+      }
+      if(direction==2)
+      {
+        ledcWrite(channel4, speed);
+        ledcWrite(channel2, 0);
+      }
+      
+    }
+}
 /**
    initTemp
    Setup DHT library
@@ -232,11 +269,18 @@ void setup() {
       free(tmpStr);
       if (tmpStr[0] == 0x7f)
       {
+        pwmLow=tmpStr[5]+128;
+        pwmMiddle=tmpStr[6]+128;
+        pwmHigh=tmpStr[7]+128;
+        direction1=tmpStr[8];
+        direction2=tmpStr[9];
         if (tmpStr[1] == 0) //继电器1关
         {
           DOUT1(LOW);
           DOUT1LED(LOW);
-          MOTOR1(0);
+          //MOTOR1(0);
+          setPWM(1,direction1,0);
+          
         }
         else if (tmpStr[1] == 1) //继电器1开
         {
@@ -244,15 +288,18 @@ void setup() {
           DOUT1LED(HIGH);
           if (tmpStr[2] == 0) //电机1
           {
-            MOTOR1(0);
+            //MOTOR1(0);
+            setPWM(1,direction1,0);
           }
           else if (tmpStr[2] == 1) //电机1
           {
-            MOTOR1(pwmLow);
+            //MOTOR1(pwmLow);
+            setPWM(1,direction1,pwmLow);
           }
           else if (tmpStr[2] == 2) //电机1
           {
-            MOTOR1(pwmHigh);
+            //MOTOR1(pwmHigh);
+            setPWM(1,direction1,pwmHigh);
           }
                   //              else if(tmpStr[3]==3)//电机1
         //              {
@@ -264,7 +311,8 @@ void setup() {
         {
           DOUT2(LOW);
           DOUT2LED(LOW);
-          MOTOR2(0);
+          //MOTOR2(0);
+          setPWM(2,direction2,0);
         }
         else if (tmpStr[3] == 1) //继电器1开
         {
@@ -273,25 +321,25 @@ void setup() {
 
           if (tmpStr[4] == 0) //电机1
           {
-            MOTOR2(0);
+            //MOTOR2(0);
+            setPWM(2,direction2,0);
           }
           else if (tmpStr[4] == 1) //电机1
           {
-            MOTOR2(pwmLow);
+            //MOTOR2(pwmLow);
+            setPWM(2,direction2,pwmLow);
           }
           else if (tmpStr[4] == 2) //电机1
           {
-            MOTOR2(pwmHigh);
+            //MOTOR2(pwmHigh);
+            setPWM(2,direction2,pwmHigh);
           }
           //              else if(tmpStr[4]==3)//电机1
           //              {
           //                MOTOR2(pwmHigh);
           //              }
         }
-        pwmLow=tmpStr[5]+128;
-        pwmMiddle=tmpStr[6]+128;
-        pwmHigh=tmpStr[7]+128;
-
+        
       }
     });
 
@@ -308,9 +356,15 @@ void setup() {
   ledcAttachPin(motor1, channel1);  // 将通道与对应的引脚连接
   ledcSetup(channel2, freq, resolution); // 设置通道
   ledcAttachPin(motor2, channel2);  // 将通道与对应的引脚连接
-  MOTOR1(0);
-  MOTOR2(0);
-  
+
+  ledcSetup(channel3, freq, resolution); // 设置通道
+  ledcAttachPin(motor3, channel3);  // 将通道与对应的引脚连接
+  ledcSetup(channel4, freq, resolution); // 设置通道
+  ledcAttachPin(motor4, channel4);  // 将通道与对应的引脚连接
+  //MOTOR1(0);
+  //MOTOR2(0);
+  setPWM(1,direction1,0);
+  setPWM(2,direction2,0);
 }
 
 void loop() {
